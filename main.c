@@ -1,13 +1,46 @@
-#define MACSKA_RL_BUFSIZE 1024
+#define ISKASH_RL_BUFSIZE 1024
+#define ISKASH_TOK_BUFSIZE 64;
+#define ISKASH_TOL_DELIM " \t\r\n\a";
+char **iskaSh_split_line(char *line)
+{
+  int bufsize = ISKASH_TOK_BUFSIZE, position=0;
+  char **tokens = malloc(bufsize * sizeof(char*));
+  char *token;
 
-char *macska_read_line(void){
-  int bufsize = MACSKA_RL_BUFSIZE;
+  if (!tokens){
+    fprintf(stderr, "iskaSh: allocation error\n");
+    exit(EXIT_FAILURE);
+  }
+
+  token = strtok(line,ISKASH_TOL_DELIM);
+  while (token != NULL) {
+    tokens[position] =token;
+    position++;
+    
+    if (position  >= bufsize){
+      bufsize+=ISKASH_TOK_BUFSIZE;
+      tokens=realloc(tokens,bufsize*sizeof(char*));
+      if (!tokens){
+        fprintf(stderr, "iskaSh: allocation error\n");
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    token=strtok(NULL,ISKASH_TOL_DELIM);
+  }
+tokens[position]=NULL;
+  return tokens;
+}
+
+
+char *iskaSh_read_line(void){
+  int bufsize = ISKASH_RL_BUFSIZE;
   int position = 0;
   char *buffer = malloc(sizeof(char)* bufsize);
   int c;
 
   if (!buffer){
-    fprintf(stderr, "macska: allocation error\n");
+    fprintf(stderr, "iskaSh: allocation error\n");
     exit(EXIT_FAILURE);
   }
   while (1){
@@ -26,26 +59,26 @@ char *macska_read_line(void){
 
     // If we have exceeded the buffer, reallocate.
     if(position >=bufsize){
-      bufsize+= MACSKA_RL_BUFSIZE;
+      bufsize+= ISKASH_RL_BUFSIZE;
       buffer = realloc(buffer,bufsize);
       if (!buffer){
-        fprintf(stderr, "macska: allocation error\n");
+        fprintf(stderr, "iskaSh: allocation error\n");
         exit(EXIT_FAILURE);
       }
     }
   }
 }
 
-void macska_loop(void){
+void iskaSh_loop(void){
   char *line;
   char **args;
   int status;
 
   do {
     printf("> ");
-    line = macska_read_line();
-    args = macska_split_line(line);
-    status = macska_execute(args);
+    line = iskaSh_read_line();
+    args = iskaSh_split_line(line);
+    status = iskaSh_execute(args);
 
     free(line);
     free(args)
@@ -58,7 +91,7 @@ int int main(int argc, char *argv[])
 
 
   // Run command loop
-  macska_loop();
+  iskaSh_loop();
 
   //Perform shutdown/cleanup
 
