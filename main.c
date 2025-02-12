@@ -1,6 +1,89 @@
+#include <sys/wait.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+// Define
 #define ISKASH_RL_BUFSIZE 1024
-#define ISKASH_TOK_BUFSIZE 64;
-#define ISKASH_TOL_DELIM " \t\r\n\a";
+#define ISKASH_TOK_BUFSIZE 64
+#define ISKASH_TOL_DELIM " \t\r\n\a"
+
+// Function declarations for builtin shell commands:
+int iskaSh_cd(char **args);
+int iskaSh_help(char **args);
+int iskaSh_exit(char **args);
+
+// List of builtin commands, followed by their corresponding functions.
+char *builtin_str[]={
+  "cd",
+  "help",
+  "exit"
+};
+
+int (*builtin_func[]) (char **) = {
+  &iskaSh_cd,
+  &iskaSh_help,
+  &iskaSh_exit
+};
+
+int iskaSh_num_builtins(){
+  return sizeof(builtin_str) / sizeof(char *);
+}
+
+// Builtin function implemetations
+int iskaSh_cd(char **args){
+  if (args[1]== NULL){
+    fprintf(stderr, "iskaSh: expected argument to \"cd\"\n");
+  } else {
+    if (chdir(args[1]) != 0){
+      perror("iskaSh");
+    }
+  }
+  return 1;
+}
+
+int iskaSh_help(char **args){
+  int i;
+  printf("Simon Mansse's iskaSh\n");
+  printf("Type program names and arguments and hit enter.\n");
+  printf("The following are built in:\n");
+
+  for (i=0;i<iskaSh_num_builtins();i++) {
+    printf(" %s\n",builtin_str[i]);
+  }
+  printf("Use the man command for information on other programs.\n");
+  return 1;
+}
+
+int iskaSh_exit(char **args){
+  return 0;
+}
+
+int iskaSh_launch(char **args){
+  pid_t pid, wpid;
+  int status;
+
+  pid = fork();
+  if (pid == 0){
+  // Child process
+  if (execvp(args[0],args) == -1){
+      perror("iskaSh");
+    }
+    exit(EXIT_FAILURE);
+  } else if (pid < 0){
+    // Error forking
+    perror("iskaSh");
+  }else {
+    // Parent process
+    do {
+      wpid = waitpid(pid, &status, WUNTRACED);
+    } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+  }
+
+  return 1;
+}
+
 char **iskaSh_split_line(char *line)
 {
   int bufsize = ISKASH_TOK_BUFSIZE, position=0;
@@ -69,6 +152,23 @@ char *iskaSh_read_line(void){
   }
 }
 
+int iskaSh_execute(char **args){
+  int i;
+
+  if (args[0] == NULL) {
+    //empty command was entered
+    return 1;
+  }
+
+  for (i = 0; i < iskaSh_num_builtins() ; i++) {
+    if (strcmp(args[0], builtin_str[i]) == 0){
+      return (*builtin_func[i])(args);
+    }
+  }
+
+  return iskaSh_launch(args);
+}
+
 void iskaSh_loop(void){
   char *line;
   char **args;
@@ -81,11 +181,11 @@ void iskaSh_loop(void){
     status = iskaSh_execute(args);
 
     free(line);
-    free(args)
+    free(args);
   } while (status);
 }
 
-int int main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
  // load config files, if any
 
