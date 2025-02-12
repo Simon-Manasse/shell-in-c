@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
+#include <ncurses.h>
 
 // Define
 #define ISKASH_RL_BUFSIZE 1024
@@ -115,6 +117,9 @@ tokens[position]=NULL;
   return tokens;
 }
 
+void auto_completion(void){
+  printf("Tab was pressed\n");
+}
 
 char *iskaSh_read_line(void){
   int bufsize = ISKASH_RL_BUFSIZE;
@@ -129,9 +134,9 @@ char *iskaSh_read_line(void){
   while (1){
     // Read a character
     c = getchar();
-
+    
     // If we hit EOF, replace it with a null character and return.
-    if (c == EOF || c=='\n'){
+    if (c == EOF || c=='\n') {
       buffer[position] = '\0';
       return buffer;
     }
