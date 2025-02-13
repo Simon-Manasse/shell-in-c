@@ -1,28 +1,46 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <dirent.h>
 #include "builtin.h"
 #include "../textInput/launch.h"
+
 // List of builtin commands, followed by their corresponding functions.
 char *builtin_str[]={
   "cd",
   "help",
   "exit",
-  "touch"
+  "touch",
+  "listDir",
 };
 
 int (*builtin_func[]) (char **) = {
   &iskaSh_cd,
   &iskaSh_help,
   &iskaSh_exit,
-  &iskaSH_touch
+  &iskaSh_touch,
+  &iskaSh_listDir
 };
 
 int iskaSh_num_builtins(){
   return sizeof(builtin_str) / sizeof(char *);
-}:
+};
+
 
 // Builtin function implemetations
+int iskaSh_listDir(char **args){
+  DIR *d;
+  struct dirent *dir;
+  d = opendir(".");
+  if (d){
+    while ((dir = readdir(d)) != NULL) {
+      printf("%s\n", dir->d_name);
+    }
+  closedir(d);
+  }
+  return 1;
+}
+
 int iskaSh_touch(char **args){
   FILE *fptr;
 if (args[1]== NULL){

@@ -6,4 +6,6 @@ int iskaSh_cd(char **args);
 int iskaSh_help(char **args);
 int iskaSh_exit(char **args);
 int iskaSh_execute(char **args);
+int iskaSh_touch(char **args);
+int iskaSh_listDir(char **args);
 #endif // !BUILTIN_H_

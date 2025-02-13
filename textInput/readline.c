@@ -17,7 +17,7 @@ char *iskaSh_read_line(void){
   while (1){
     // Read a character
     c = getchar();
-    
+   
     // If we hit EOF, replace it with a null character and return.
     if (c == EOF || c=='\n') {
       buffer[position] = '\0';

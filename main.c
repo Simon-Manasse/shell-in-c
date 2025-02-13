@@ -1,7 +1,7 @@
 // Includes
 #include <stdlib.h>
 #include <stdio.h>
-
+#include <unistd.h>
 // headers
 #include "./textInput/readline.h"
 #include "./textInput/splitlines.h"
@@ -13,6 +13,9 @@ void iskaSh_loop(void){
   int status;
 
   do {
+    char cwd[1024];
+    getcwd(cwd,sizeof(cwd));
+    printf("%s\n",cwd);
     printf("> ");
     line = iskaSh_read_line();
     args = iskaSh_split_line(line);
