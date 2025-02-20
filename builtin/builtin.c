@@ -30,6 +30,7 @@ int iskaSh_num_builtins(){
   return sizeof(builtin_str) / sizeof(char *);
 };
 
+// Sorts the string in an aplhabetical order
 void sortString(char **array, int ammountOfItems){
 int i,j;
 char tmp[100];
@@ -69,9 +70,10 @@ int iskaSh_listDir(char **args){
   sortString(dirFiles,amountOfFiles);
 
   for (i=0;i<amountOfFiles;i++) {
-    printf("%s\t", dirFiles[i]);
+    printf("%s  ", dirFiles[i]);
     free(dirFiles[i]);
   }
+  printf("\n");
   return 1;
 }
 

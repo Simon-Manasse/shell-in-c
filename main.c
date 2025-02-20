@@ -18,6 +18,7 @@ void iskaSh_loop(void){
     printf("%s\n",cwd);
     printf("> ");
     line = iskaSh_read_line();
+    printf("%s\n",line);
     args = iskaSh_split_line(line);
     status = iskaSh_execute(args);
 
