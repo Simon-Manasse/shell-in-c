@@ -2,8 +2,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <stdlib.h>
 #include "builtin.h"
 #include "../textInput/launch.h"
+
+
+
 
 // List of builtin commands, followed by their corresponding functions.
 char *builtin_str[]={
@@ -26,17 +30,47 @@ int iskaSh_num_builtins(){
   return sizeof(builtin_str) / sizeof(char *);
 };
 
+void sortString(char **array, int ammountOfItems){
+int i,j;
+char tmp[100];
+for(i=0; i<ammountOfItems;i++){
+    for (j=i+1;j<ammountOfItems;j++) {
+      if(strcmp(array[i],array[j])>0){
+        strcpy(tmp,array[i]);
+        strcpy(array[i],array[j]);
+        strcpy(array[j],tmp);
+      }
+    }
+  }
+};
+
 
 // Builtin function implemetations
 int iskaSh_listDir(char **args){
   DIR *d;
   struct dirent *dir;
   d = opendir(".");
+  int amountOfFiles=0, i, j;
+  char *dirFiles[100];
+
   if (d){
-    while ((dir = readdir(d)) != NULL) {
-      printf("%s\n", dir->d_name);
+    while ((dir = readdir(d)) != NULL && amountOfFiles < 100) {
+     // printf("%s\n", dir->d_name);
+    dirFiles[amountOfFiles] = malloc(strlen(dir->d_name)+1);
+      if (dirFiles[amountOfFiles]== NULL) {
+        perror("iskaSh: Malloc error");
+        return 1;
+      }
+      strcpy(dirFiles[amountOfFiles],dir->d_name);
+      amountOfFiles++;
     }
   closedir(d);
+  }
+  sortString(dirFiles,amountOfFiles);
+
+  for (i=0;i<amountOfFiles;i++) {
+    printf("%s\t", dirFiles[i]);
+    free(dirFiles[i]);
   }
   return 1;
 }
